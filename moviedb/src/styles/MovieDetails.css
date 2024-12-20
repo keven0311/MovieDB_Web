@@ -1,0 +1,23 @@
+.movie-details {
+    text-align: center;
+    margin: 2rem auto;
+    max-width: 800px;
+  }
+  
+  .movie-details img {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 10px;
+    margin-bottom: 1rem;
+  }
+  
+  .movie-details h1 {
+    font-size: 2rem;
+    margin: 1rem 0;
+  }
+  
+  .movie-details p {
+    font-size: 1rem;
+    line-height: 1.5;
+  }
+  

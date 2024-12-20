@@ -1,0 +1,77 @@
+.movie-card {
+  background-color: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 20%;
+  text-align: center;
+}
+
+.movie-card-img img {
+  width: 100%;
+  height: auto;
+}
+
+.movie-card-link{
+  text-decoration: none;
+  color: black;
+}
+
+.movie-card-link:hover{
+  color: #90cea1;
+}
+
+.movie-card-title {
+  font-size: 1.2rem;
+  margin: 0.5rem 0;
+  text-decoration: none;
+}
+
+.rating {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+}
+
+.rating-icon {
+  color: gold;
+}
+
+.like-icon {
+  cursor: pointer;
+}
+
+.like-icon.ion-md-heart {
+  color: red;
+}
+
+.like-icon.ion-md-heart-empty {
+  color: grey;
+}
+
+/* rating icon */
+.ion-md-star:before{
+  content: "★";
+  color: #f5c518;
+  margin-right: 0.5rem;
+  cursor:default;
+  font-size: 1.5rem;
+}
+
+/* like icon */
+.ion-md-heart:before{
+  content: "♥";
+  color:red;
+  font-size: 1.5rem;
+}
+
+.ion-md-heart-empty:before{
+  content: "♡";
+  font-size: 1.5rem;
+}
+
+.movie-card .icon{
+  font-size: 2rem;
+  cursor: pointer;
+}
