@@ -5,6 +5,7 @@ import MovieCard from "./components/MovieCard";
 import SelectFilter from "./components/SelectFilter";
 import Pagination from "./components/Pagination";
 import MovieDetails from "./components/MovieDetails";
+import Login from "./components/Login";
 import "./App.css";
 
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -137,6 +138,12 @@ function App() {
         <Route
           path="/movie/:id"
           element={<MovieDetails BASE_URL={BASE_URL} baseImgSrc={BASE_IMG_SRC} API_OPTIONS={API_OPTIONS}/>}
+        />
+        <Route
+          path="/login"
+          element={
+            <Login BASE_URL={BASE_URL}/>
+          }
         />
       </Routes>
     </div>
