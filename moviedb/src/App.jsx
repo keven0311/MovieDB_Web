@@ -14,7 +14,8 @@ const API_OPTIONS = {
   method: "GET",
   headers: {
     accept: "application/json",
-    Authorization: "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMjQ5YjhlZjliNGNmMzE0OGQzOGRjZmE4NDBkOGQyMCIsIm5iZiI6MTczMzI0MDgwOS41MTIsInN1YiI6IjY3NGYyN2U5ZDI3ZGNmMDA1MjNmNGE5MSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.WFQwhzh-pSTIAJWXUMZPgkTQvHkLMHVViJZwIMdSB8I",
+    Authorization:
+      "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMjQ5YjhlZjliNGNmMzE0OGQzOGRjZmE4NDBkOGQyMCIsIm5iZiI6MTczMzI0MDgwOS41MTIsInN1YiI6IjY3NGYyN2U5ZDI3ZGNmMDA1MjNmNGE5MSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.WFQwhzh-pSTIAJWXUMZPgkTQvHkLMHVViJZwIMdSB8I",
   },
 };
 
@@ -32,9 +33,9 @@ function App() {
     const cacheKey = `${category}-movies`;
     let cache = localStorage.getItem(cacheKey);
 
-    cache = cache ? JSON.parse(cache) : {}
+    cache = cache ? JSON.parse(cache) : {};
     // return data if already stored in localstorage:
-    if(cache[page]){
+    if (cache[page]) {
       return cache[page];
     }
 
@@ -47,34 +48,64 @@ function App() {
     // adding fetched data into cache
     cache[page] = data;
     localStorage.setItem(cacheKey, JSON.stringify(cache));
-    
+
     return data;
   };
 
   // reset currentPage when filter change:
   useEffect(() => {
     setCurrentPage(1);
-  },[currentFilter])
+  }, [currentFilter]);
 
   useEffect(() => {
     const loadMovies = async () => {
       const data = await fetchMovies(currentFilter, currentPage);
-      console.log(data)
       setMovies(data.results || []);
       setToltalPages(data.total_pages);
     };
     loadMovies();
   }, [currentFilter, currentPage]);
 
-  const handleLike = (movie) => {
-    setLikedMovies((prev) => {
-      const isLiked = prev.some((liked) => liked.id === movie.id);
-      if(isLiked){
-        return prev.filter((liked) => liked.id !== movie.id);
-      }else{
-        return [...prev,movie]
-      }
-    });
+  useEffect(() => {
+    const localStorageLikedMovies = localStorage.getItem("likedMovies");
+    console.log(localStorageLikedMovies)
+    if(localStorageLikedMovies){
+      setLikedMovies(JSON.parse(localStorageLikedMovies))
+    }else{
+      setLikedMovies([])
+    }
+  },[])
+
+  const handleLike = async (movie) => {
+    const userData = localStorage.getItem('user');
+    const isLiked = likedMovies.some(likedMovie => likedMovie.id === movie.id);
+    console.log(`isLIked : ${isLiked}`)
+    const option = {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "content-type": "application/json",
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMjQ5YjhlZjliNGNmMzE0OGQzOGRjZmE4NDBkOGQyMCIsIm5iZiI6MTczMzI0MDgwOS41MTIsInN1YiI6IjY3NGYyN2U5ZDI3ZGNmMDA1MjNmNGE5MSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.WFQwhzh-pSTIAJWXUMZPgkTQvHkLMHVViJZwIMdSB8I",
+      },
+      body:JSON.stringify({media_type:'movie',media_id:movie.id,favorite:!isLiked})
+    };
+    const res = await fetch(`https://api.themoviedb.org/3/account/${userData.accountId}/favorite`,option)
+                      .then((res) => res.json());
+
+    if(res.success){
+      setLikedMovies((prev) => {
+            const isLiked = prev.some((liked) => liked.id === movie.id);
+            if(isLiked){
+              return prev.filter((liked) => liked.id !== movie.id);
+            }else{
+              return [...prev,movie]
+            }
+          });
+      localStorage.setItem("likedMovies",JSON.stringify(likedMovies))
+    }else{
+      console.log("tostify: falied to add to liked!")
+    }
   };
 
   const handleRate = (movie) => {
@@ -88,8 +119,8 @@ function App() {
   };
 
   const renderMovies = (moviesList) => {
-    if(!moviesList || moviesList.length === 0){
-      return <p> No movies available. </p>
+    if (!moviesList || moviesList.length === 0) {
+      return <p> No movies available. </p>;
     }
     return moviesList.map((movie) => (
       <MovieCard
@@ -137,14 +168,15 @@ function App() {
         />
         <Route
           path="/movie/:id"
-          element={<MovieDetails BASE_URL={BASE_URL} baseImgSrc={BASE_IMG_SRC} API_OPTIONS={API_OPTIONS}/>}
-        />
-        <Route
-          path="/login"
           element={
-            <Login BASE_URL={BASE_URL}/>
+            <MovieDetails
+              BASE_URL={BASE_URL}
+              baseImgSrc={BASE_IMG_SRC}
+              API_OPTIONS={API_OPTIONS}
+            />
           }
         />
+        <Route path="/login" element={<Login/>} />
       </Routes>
     </div>
   );
