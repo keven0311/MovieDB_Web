@@ -28,5 +28,14 @@
     text-decoration: underline;
   }
 
+  .login-username{
+    color: white;
+  }
 
+  .logout-btn{
+    margin-left: 10px;
+    border: 0px solid black;
+    border-radius: 10px;
+    height: 25px;
+  }
   

@@ -26,6 +26,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setToltalPages] = useState(0);
   const [currentFilter, setCurrentFilter] = useState("popular");
+  const [user, setUser ] = useState(null)
 
   //fetch movies from API:
   const fetchMovies = async (category = "popular", page = 1) => {
@@ -135,7 +136,7 @@ function App() {
 
   return (
     <div className="App">
-      <Navbar />
+      <Navbar user={user} setUser={setUser}/>
       <Routes>
         <Route
           path="/"
@@ -176,7 +177,7 @@ function App() {
             />
           }
         />
-        <Route path="/login" element={<Login/>} />
+        <Route path="/login" element={<Login user={user} setUser={setUser}/>} />
       </Routes>
     </div>
   );

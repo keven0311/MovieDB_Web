@@ -1,8 +1,19 @@
 import { NavLink } from 'react-router-dom';
 import '../styles/Navbar.css'; 
 import logo from '../assets/moviedb_logo.svg'
+import { useEffect } from 'react';
 
-const Navbar = () => {
+const Navbar = ({ user, setUser}) => {
+  
+  useEffect(() => {
+    setUser(JSON.parse(localStorage.getItem('user')))
+  },[])
+  
+  const handleLogout = () => {
+    localStorage.setItem('user',null);
+    setUser(null);
+  }
+
   return (
     <nav className="navbar">
       <div className="logo-container">
@@ -34,14 +45,25 @@ const Navbar = () => {
           </NavLink>
         </li>
       </ul>
-      <div>
-        <NavLink
-              to="/login"
-              className={({ isActive }) => (isActive ? 'tab-item tab-item-login active' : 'tab-item tab-item-login')}
-              >
-              Login
-        </NavLink>
-      </div>
+      {
+        user?.username 
+        ? (
+        <div className='login-username'>
+          {user.username}
+          <button className='logout-btn' onClick={handleLogout}>Logout</button>
+        </div>
+        )
+        : (
+        <div>
+          <NavLink
+                to="/login"
+                className={({ isActive }) => (isActive ? 'tab-item tab-item-login active' : 'tab-item tab-item-login')}
+                >
+                Login
+          </NavLink>
+        </div>
+        )
+      }
     </nav>
   );
 };
