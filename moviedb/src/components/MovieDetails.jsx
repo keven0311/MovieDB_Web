@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import "../styles/MovieDetails.css";
+import { toast, ToastContainer } from "react-toastify";
 
-const MovieDetails = ({ BASE_URL, baseImgSrc, API_OPTIONS }) => {
+const MovieDetails = ({ BASE_URL, baseImgSrc, API_OPTIONS, setRatedMovies }) => {
   const { id } = useParams();
   const [movie, setMovie] = useState(null);
   const [rating, setRating] = useState(1);
@@ -19,16 +20,43 @@ const MovieDetails = ({ BASE_URL, baseImgSrc, API_OPTIONS }) => {
   const handleRatingChange = (e) => {
     setRating(e.target.value);
   }
-
-  const handleRateIt = () => {
-
-  }
   
-  console.log(movie)
+  const handleRate = async (movie, rating) => {
+    const options = {
+      method: "POST",
+      headers: {
+        accept: "application/json",
+        "Content-Type": "application/json;charset=utf-8",
+        Authorization:
+          "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMjQ5YjhlZjliNGNmMzE0OGQzOGRjZmE4NDBkOGQyMCIsIm5iZiI6MTczMzI0MDgwOS41MTIsInN1YiI6IjY3NGYyN2U5ZDI3ZGNmMDA1MjNmNGE5MSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.WFQwhzh-pSTIAJWXUMZPgkTQvHkLMHVViJZwIMdSB8I",
+      },
+      body: `{"value":${rating}}`,
+    };
+
+    const ratingApiRes = await fetch(
+      `https://api.themoviedb.org/3/movie/${movie.id}/rating`,
+      options
+    );
+    if (ratingApiRes.ok) {
+      const res = await ratingApiRes.json();
+      if(res.success){
+        toast.success("Rating success!")
+      }
+      setRatedMovies((prev) =>
+        prev.some((rated) => rated.id === movie.id)
+          ? prev.map((rated) =>
+              rated.id === movie.id ? { ...rated, ...movie } : rated
+            )
+          : [...prev, movie]
+      );
+    }
+  };
+
   if (!movie) return <div>Loading...</div>;
 
   return (
     <div className="movie-details">
+      <ToastContainer/>
       <div className="movie-details-left">
         <img src={`${baseImgSrc}${movie.poster_path}`} alt={movie.title} />
       </div>
@@ -71,7 +99,7 @@ const MovieDetails = ({ BASE_URL, baseImgSrc, API_OPTIONS }) => {
                 </option>
               ))}
             </select>
-            <button onClick={handleRateIt}>RATE IT!</button>
+            <button onClick={() => handleRate(movie,rating)}>RATE IT!</button>
           </div>
         </div>
         <div className="movie-details-right-sections">

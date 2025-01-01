@@ -124,8 +124,7 @@ function Login({ setUser }) {
 
       return loginResMessage;
     }
-    const accountDetails = accountDetailsRes.json();
-
+    const accountDetails = await accountDetailsRes.json();
     // store user data into localstorage:
     const userData = {
       username,

@@ -6,6 +6,7 @@ import SelectFilter from "./components/SelectFilter";
 import Pagination from "./components/Pagination";
 import MovieDetails from "./components/MovieDetails";
 import Login from "./components/Login";
+import { ToastContainer, toast } from "react-toastify";
 import "./App.css";
 
 const BASE_URL = "https://api.themoviedb.org/3";
@@ -26,7 +27,7 @@ function App() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setToltalPages] = useState(0);
   const [currentFilter, setCurrentFilter] = useState("popular");
-  const [user, setUser ] = useState(null)
+  const [user, setUser] = useState(null);
 
   //fetch movies from API:
   const fetchMovies = async (category = "popular", page = 1) => {
@@ -69,18 +70,38 @@ function App() {
 
   useEffect(() => {
     const localStorageLikedMovies = localStorage.getItem("likedMovies");
-    console.log(localStorageLikedMovies)
-    if(localStorageLikedMovies){
-      setLikedMovies(JSON.parse(localStorageLikedMovies))
-    }else{
-      setLikedMovies([])
+    if (localStorageLikedMovies) {
+      setLikedMovies(JSON.parse(localStorageLikedMovies));
+    } else {
+      setLikedMovies([]);
     }
-  },[])
+  }, []);
+
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem('user'));
+    const getRatedMoviesApiCall = async () => {
+      const getRatedMoviesApiOptions = {
+        method: "GET",
+        headers: {
+          accept: "application/json",
+          Authorization:
+            "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMjQ5YjhlZjliNGNmMzE0OGQzOGRjZmE4NDBkOGQyMCIsIm5iZiI6MTczMzI0MDgwOS41MTIsInN1YiI6IjY3NGYyN2U5ZDI3ZGNmMDA1MjNmNGE5MSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.WFQwhzh-pSTIAJWXUMZPgkTQvHkLMHVViJZwIMdSB8I",
+        },
+      };
+      const getRatedMoviesApiRes = await fetch(`https://api.themoviedb.org/3/account/${userData.accountId}/rated/movies?language=en-US&page=1&sort_by=created_at.asc`,getRatedMoviesApiOptions);
+      if(getRatedMoviesApiRes.ok){
+        const data = await getRatedMoviesApiRes.json();
+        setRatedMovies(data.results)
+      }
+    }
+    getRatedMoviesApiCall();
+  }, []);
 
   const handleLike = async (movie) => {
-    const userData = localStorage.getItem('user');
-    const isLiked = likedMovies.some(likedMovie => likedMovie.id === movie.id);
-    console.log(`isLIked : ${isLiked}`)
+    const userData = localStorage.getItem("user");
+    const isLiked = likedMovies.some(
+      (likedMovie) => likedMovie.id === movie.id
+    );
     const option = {
       method: "POST",
       headers: {
@@ -89,34 +110,30 @@ function App() {
         Authorization:
           "Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIwMjQ5YjhlZjliNGNmMzE0OGQzOGRjZmE4NDBkOGQyMCIsIm5iZiI6MTczMzI0MDgwOS41MTIsInN1YiI6IjY3NGYyN2U5ZDI3ZGNmMDA1MjNmNGE5MSIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.WFQwhzh-pSTIAJWXUMZPgkTQvHkLMHVViJZwIMdSB8I",
       },
-      body:JSON.stringify({media_type:'movie',media_id:movie.id,favorite:!isLiked})
+      body: JSON.stringify({
+        media_type: "movie",
+        media_id: movie.id,
+        favorite: !isLiked,
+      }),
     };
-    const res = await fetch(`https://api.themoviedb.org/3/account/${userData.accountId}/favorite`,option)
-                      .then((res) => res.json());
+    const res = await fetch(
+      `https://api.themoviedb.org/3/account/${userData.accountId}/favorite`,
+      option
+    ).then((res) => res.json());
 
-    if(res.success){
+    if (res.success) {
       setLikedMovies((prev) => {
-            const isLiked = prev.some((liked) => liked.id === movie.id);
-            if(isLiked){
-              return prev.filter((liked) => liked.id !== movie.id);
-            }else{
-              return [...prev,movie]
-            }
-          });
-      localStorage.setItem("likedMovies",JSON.stringify(likedMovies))
-    }else{
-      console.log("tostify: falied to add to liked!")
+        const isLiked = prev.some((liked) => liked.id === movie.id);
+        if (isLiked) {
+          return prev.filter((liked) => liked.id !== movie.id);
+        } else {
+          return [...prev, movie];
+        }
+      });
+      localStorage.setItem("likedMovies", JSON.stringify(likedMovies));
+    } else {
+      toast.error("Failed to add to liked movie.");
     }
-  };
-
-  const handleRate = (movie) => {
-    setRatedMovies((prev) =>
-      prev.some((rated) => rated.id === movie.id)
-        ? prev.map((rated) =>
-            rated.id === movie.id ? { ...rated, ...movie } : rated
-          )
-        : [...prev, movie]
-    );
   };
 
   const renderMovies = (moviesList) => {
@@ -136,7 +153,8 @@ function App() {
 
   return (
     <div className="App">
-      <Navbar user={user} setUser={setUser}/>
+      <Navbar user={user} setUser={setUser} />
+      <ToastContainer />
       <Routes>
         <Route
           path="/"
@@ -174,10 +192,14 @@ function App() {
               BASE_URL={BASE_URL}
               baseImgSrc={BASE_IMG_SRC}
               API_OPTIONS={API_OPTIONS}
+              setRatedMovies={setRatedMovies}
             />
           }
         />
-        <Route path="/login" element={<Login user={user} setUser={setUser}/>} />
+        <Route
+          path="/login"
+          element={<Login user={user} setUser={setUser} />}
+        />
       </Routes>
     </div>
   );
